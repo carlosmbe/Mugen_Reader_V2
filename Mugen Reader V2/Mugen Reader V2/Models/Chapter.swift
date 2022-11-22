@@ -1,0 +1,116 @@
+//
+//  Chapter.swift
+//  Mugen Reader V2
+//
+//  Created by Carlos Mbendera on 04/11/2022.
+//
+
+import Foundation
+import SwiftUI
+
+
+struct ReadChapterResponse: Codable{
+   var result:  String
+   var baseUrl: String
+   var chapter: ChapterPages
+}
+
+struct ChapterPages: Codable{
+        var  hash: String
+        var  data: [String]
+        var  dataSaver: [String]
+}
+
+
+struct ChapterFeedResponse: Codable{
+    var  result:    String
+    var  response:  String
+    var  data: [FeedChapter]
+}
+
+struct FeedChapter: Codable, Identifiable{
+    var id: String
+    var attributes: ChapterDetails
+}
+
+struct ChapterDetails: Codable{
+    var volume   :    String?
+    var chapter  :    String?
+    var title    :    String?
+}
+
+
+
+enum FeedChapterErrors: Error{
+    case badURL, decodingError, unknownError
+}
+
+extension FeedChapter{
+    
+    static func buildChapterNameView(_ chapter: FeedChapter) -> some View{
+        @ViewBuilder var chapterView : some View {
+            if let chapterOptional = chapter.attributes.chapter{
+                Text("Chapter \(chapterOptional)")
+                if let titleoptional = chapter.attributes.title{
+                    Text( titleoptional.isEmpty ? "" : titleoptional)
+                        .padding(.leading, 10)
+                }
+            }
+        }
+        return chapterView
+    }
+    
+    static func getMangaChapterFeed(for mangaID : String) async throws -> [FeedChapter] {
+        let rawURL: String = "https://api.mangadex.org/manga/\(mangaID)/feed?limit=100&translatedLanguage%5B%5D=en&contentRating%5B%5D=safe&contentRating%5B%5D=suggestive&contentRating%5B%5D=erotica&contentRating%5B%5D=pornographic&includeFutureUpdates=1&order%5BcreatedAt%5D=asc&order%5BupdatedAt%5D=asc&order%5BpublishAt%5D=asc&order%5BreadableAt%5D=asc&order%5Bvolume%5D=asc&order%5Bchapter%5D=asc"
+        
+        guard let apiurl = URL(string: rawURL) else {
+            print("Failure and Emotional Damage")
+            throw FeedChapterErrors.badURL
+        }
+        do{
+            let (data, _) = try await URLSession.shared.data(from: apiurl)
+            
+            if let decodedResponse = try? JSONDecoder().decode(ChapterFeedResponse.self, from: data){
+                return decodedResponse.data
+            }else{
+                throw FeedChapterErrors.decodingError
+            }
+            
+        } catch{
+            throw FeedChapterErrors.unknownError
+        }
+        throw FeedChapterErrors.unknownError
+    }// Func Ends Here
+    
+    static func getReadingChapterURLS(chapterID : String) async throws -> ReadChapterResponse{
+        
+        print("Started getting pages")
+        
+        let getReadChaptersURL = ("https://api.mangadex.org/at-home/server/\(chapterID)")
+        print(getReadChaptersURL)
+        
+        guard let callURL = URL(string: getReadChaptersURL) else{
+            print("We had an error with the URL, rare, but it happens")
+            throw FeedChapterErrors.badURL
+        }
+        
+        do{
+            let (data,_) = try await URLSession.shared.data(from: callURL)
+          
+            if let decodedResponse = try? JSONDecoder().decode(ReadChapterResponse.self, from: data){
+              return decodedResponse
+             
+            }else{
+                print("Read Chapter if let failed")
+                throw FeedChapterErrors.decodingError
+            }
+            
+        }catch{
+            print("OMG, the api call failed. BIG SAD #getReadingChapterURLS")
+            throw FeedChapterErrors.unknownError
+        }
+        throw FeedChapterErrors.unknownError
+    }//End Of Func
+    
+}
+
