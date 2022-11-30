@@ -12,31 +12,73 @@ struct ChaptersView: View {
     let chosenManga: Manga
     
     @State private var chapterResults = [FeedChapter]()
+    var animateGetChapters : [FeedChapter]{
+        get{chapterResults}
+        set{chapterResults = newValue }
+    }
     
-    var body: some View {
-        let chosenMangaItem = chosenManga
-        
+    var ChaptersList : some View{
         List(chapterResults) { item in
             NavigationLink(
                 destination: ReadingView(viewChapterID: item.id)
-                    .onAppear{  UserDefaults.standard.set(item.attributes.chapter, forKey: chosenManga.id)    }
-                , label: {
-                FeedChapter.buildChapterNameView(item)
-            }) //Nav Link Ends Here next line
-        }  //List ends here next line
-        
-        .task {
-            do{
-                chapterResults = try await FeedChapter.getMangaChapterFeed(for: chosenMangaItem.id)
-                chapterResults.sort{
-                    guard let titleNum0 = $0.attributes.chapter, let titleNum1 = $1.attributes.chapter else{ return false}
-                    return  titleNum0.localizedStandardCompare(titleNum1) == .orderedAscending
-                }
-            }catch{
-                //MARK: Make error alert here
-            }
+                    .onAppear{
+                        let currentLastRead = LastReadChapter(id: chosenManga.id, MangaDetail: chosenManga, Chapter: item)
+                        appendToLastReadChapters(currentLastRead)
+                    },
+                label: {
+                    FeedChapter.buildChapterNameView(item)
+                }) .id(item.id) //.id for allowing jump scrolling
+            //Nav Link Ends Here
         }
+        .navigationTitle(chosenManga.attributes.title.en!)
+        .navigationBarTitleDisplayMode(.inline)
+        .task {
+                await getChapterResults()
+        }
+    }
+    
+    var body: some View {
+        
+        if let index = getLastReadID(){
+            ScrollViewReader { proxy in
+                ChaptersList
+                    .toolbar{
+                        Button("Continue") {
+                            withAnimation{
+                                proxy.scrollTo(index, anchor: .top)
+                            }
+                        }
+                    }
+            }
+        }else{
+            ChaptersList
+        }
+  
     }//body ends here
+    
+    func getLastReadID() -> String?{
+        var lastReadChapters = GetLastRead()
+        if let sameManga = lastReadChapters.firstIndex(where: {$0.id == chosenManga.id}){
+            guard let finalIndex = chapterResults.firstIndex(where: {$0.id == lastReadChapters[sameManga].Chapter.id}) else { return nil }
+            return chapterResults[finalIndex].id
+        }else{
+            return nil
+        }
+        
+    }
+    
+    func getChapterResults() async{
+        do{
+            var apiChapterResults = try await FeedChapter.getMangaChapterFeed(for: chosenManga.id)
+            apiChapterResults.sort{
+                guard let titleNum0 = $0.attributes.chapter, let titleNum1 = $1.attributes.chapter else{ return false}
+                return  titleNum0.localizedStandardCompare(titleNum1) == .orderedAscending
+            }
+            withAnimation{ chapterResults = apiChapterResults}
+        }catch{
+            //MARK: Make error alert here
+        }
+    }
 }
 
 struct ReadingView : View{

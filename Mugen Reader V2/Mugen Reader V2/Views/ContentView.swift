@@ -8,13 +8,19 @@
 import SwiftUI
 
 struct ContentView: View {
+
+    var body: some View {
+            HomeView()
+        }
+}
+
+
+
+struct HomeView: View {
     
-    @StateObject private var chosenMangaAlt = MangaClass()
+  //  @StateObject private var chosenMangaAlt = MangaClass()
   
-    @State private var chosenManga = Manga.produceExampleManga()
-    
-    @State private var showMangaDescription = false
-    @State private var showThirdView = false
+ //   @State private var chosenManga = Manga.produceExampleManga()
     
     @State private var errorMessage = ""
     @State private var showingErrorAlert = false
@@ -24,7 +30,7 @@ struct ContentView: View {
     @State private var title = "Seasonal"
     
     @State private var mangaResults = [Manga]()
-    var animatableData : [Manga]{
+    var animateMangaResults : [Manga]{
         get{mangaResults}
         set{mangaResults = newValue}
     }
@@ -41,18 +47,15 @@ struct ContentView: View {
         NavigationView{
             
             List(mangaResults){ manga in
-                HStack{
-                    MangaView(item: manga)
-                    Spacer()
-                }
-                .contentShape(Rectangle())
-                //HStack, Spacer and .contentShape make on tap gesture apply on entire list row area
-                    .onTapGesture {
-                        chosenManga = manga
-                        chosenMangaAlt.manga = manga
-                        showMangaDescription = true
+                NavigationLink(destination: MangaDescription(selectedManga: manga)){
+                    HStack{
+                        MangaView(item: manga)
+                        Spacer()
                     }
-            }//List ends here
+                    .contentShape(Rectangle())
+                }
+                //HStack, Spacer and .contentShape make on tap gesture apply on entire list row area
+            }
             
             .searchable(text: $searchText)
             
@@ -61,32 +64,14 @@ struct ContentView: View {
                     mangaResults = homeMangaResults
                     title = "Seasonal"
                 }
-            }//On Change Ends Here
+            }
             
             .onSubmit(of: .search) {
                 Task{   await tryAPICallAgain()    }
-            }// On Sumbit Ends Here
+            }
             
             .navigationTitle(title)
-          /*  .toolbar{
-                Button("Reset User Data"){
-                    let defaults = UserDefaults.standard
-                    let dictionary = defaults.dictionaryRepresentation()
-                    dictionary.keys.forEach { key in
-                        let _ = print("reseting")
-                        defaults.removeObject(forKey: key)
-                    }
-                }
-            }*/
             
-            .sheet(isPresented: $showMangaDescription){ MangaDescription(showNext: $showThirdView ,selectedManga: chosenMangaAlt)    }
-           
-            .background(
-                        NavigationLink(destination: ChaptersView(chosenManga: chosenManga), isActive: $showThirdView) {
-                              ChaptersView(chosenManga: chosenManga)
-                        }
-                  )
-           //Allows sheet to open Manga Chapter List Directly
             .alert(isPresented: $showingErrorAlert){
                 Alert(
                     title: Text("There was an error :<")
@@ -139,13 +124,14 @@ struct ContentView: View {
         
     }
     
-}//Content View Ends here
+}//Home View Ends here
 
 struct MangaView: View{
     
     let item: Manga
     
     var body: some View{
+        
         HStack {
         
             Manga.getCover(item: item)
@@ -166,7 +152,7 @@ struct MangaView: View{
                         .padding(.bottom, 5)
                 }
                 
-                Text("Status: \(item.attributes.status)").padding(.leading, 5)
+                Text("Status: \(item.attributes.status.capitalized)").padding(.leading, 5)
                 
                 if let mangaYear = item.attributes.year{
                     Text("Year: \(String(mangaYear))").padding(.leading, 5)
@@ -174,24 +160,20 @@ struct MangaView: View{
                 else{ Text("Year: N/A").padding(.leading, 5) }
                 
             }//VStack Ends Here
-        }//HStach Ends Here
+        }//HStack Ends Here
         
     }
 }//MangaView Ends Here
 
 struct MangaDescription: View{
     
-    @Binding var showNext: Bool
-    let selectedManga : MangaClass
-    
-    @Environment(\.dismiss) var dismiss
-    
-    
+    let selectedManga : Manga
+        
     var body: some View{
-        let selectedMangaItem = selectedManga.manga
+        let selectedManga = selectedManga
         ZStack{
             GeometryReader { geometry in
-                Manga.getCover(item: selectedMangaItem)
+                Manga.getCover(item: selectedManga)
                     .opacity(0.1)
                     .scaledToFill()
                     .frame(width: geometry.size.width, height: geometry.size.height)
@@ -200,40 +182,22 @@ struct MangaDescription: View{
             }.ignoresSafeArea()
             
             VStack {
-                HStack{
-                  /*
-                    Manga.getCover(item: selectedMangaItem)
-                        .frame(width: 75, height: 112.5)
-                        .cornerRadius(10)
-                        .padding()
-                    */
-                    
-                    if let title = selectedMangaItem.attributes.title.en{
+            
+                    if let title = selectedManga.attributes.title.en{
                         Text(title).font(.title).padding()
                     }
-                }//H Stacks Ends Here
+        
                 
-                if let desc = selectedMangaItem.attributes.description?.en{
+                if let desc = selectedManga.attributes.description?.en{
                     Text(desc).font(.body).padding()
                 }
                 
-                if selectedMangaItem.id == "Blah"{
-                    //Then this is a dummy Manga I use an example. Meaning either an error or still loading
-                    Button("Ok"){   dismiss()   }
-                        .buttonStyle(.borderedProminent)
-                        .padding()
+                NavigationLink(destination: ChaptersView(chosenManga: selectedManga)){
+                    Text("Read")
                 }
-                else{
-                    Button("Read"){
-                        dismiss()
-                        DispatchQueue.main.async {
-                            self.showNext = true
-                        }
-                        //Show Chapter List
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .padding()
-                }
+                .buttonStyle(.borderedProminent)
+                .padding()
+                
             }//V Stack ends here
         }//ZStack Ends Here
     }

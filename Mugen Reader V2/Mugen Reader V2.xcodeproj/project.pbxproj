@@ -15,6 +15,7 @@
 		B675335329154A1C00FF9FAA /* ChaptersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B675335229154A1C00FF9FAA /* ChaptersView.swift */; };
 		B675335529154B6D00FF9FAA /* Chapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B675335429154B6D00FF9FAA /* Chapter.swift */; };
 		B698ECFA2918216F009F8AA6 /* CachedAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B698ECF92918216F009F8AA6 /* CachedAsyncImage.swift */; };
+		B6E6800429337578007ED203 /* Saved Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E6800329337578007ED203 /* Saved Data.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +28,7 @@
 		B675335229154A1C00FF9FAA /* ChaptersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChaptersView.swift; sourceTree = "<group>"; };
 		B675335429154B6D00FF9FAA /* Chapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chapter.swift; sourceTree = "<group>"; };
 		B698ECF92918216F009F8AA6 /* CachedAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedAsyncImage.swift; sourceTree = "<group>"; };
+		B6E6800329337578007ED203 /* Saved Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Saved Data.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +93,7 @@
 			children = (
 				B664C7A9290565BA00B4ECF9 /* Manga.swift */,
 				B675335429154B6D00FF9FAA /* Chapter.swift */,
+				B6E6800329337578007ED203 /* Saved Data.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -178,6 +181,7 @@
 				B664C79D290563DE00B4ECF9 /* ContentView.swift in Sources */,
 				B675335329154A1C00FF9FAA /* ChaptersView.swift in Sources */,
 				B698ECFA2918216F009F8AA6 /* CachedAsyncImage.swift in Sources */,
+				B6E6800429337578007ED203 /* Saved Data.swift in Sources */,
 				B664C79B290563DE00B4ECF9 /* Mugen_Reader_V2App.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -17,11 +17,6 @@ struct MangaResponse: Codable{
   var  data:      [Manga]
 }
 
-class MangaClass: ObservableObject{
-    var manga: Manga = Manga.produceExampleManga()
-}
-
-
 struct Manga: Codable, Identifiable{
     var id: String
     var type: String
@@ -31,10 +26,8 @@ struct Manga: Codable, Identifiable{
 
 struct MangaAttributes: Codable{
     var title: MangaLang
-    //MARK: - Temporaily removed Descrtiption cause too many errors result from this
     var description: MangaLang?
-   // var lastChapter: String
-    var year: Int? //Not all Manga on Manga Dex have Year Released, Causes errors if assumed. Same applies to above ones. Just rather not force them into app
+    var year: Int? //Not all Manga on Manga Dex have Year Released, Causes errors if assumed. Same applies to above optionals.
     var status: String
 }
 

@@ -61,7 +61,7 @@ extension FeedChapter{
     }
     
     static func getMangaChapterFeed(for mangaID : String) async throws -> [FeedChapter] {
-        let rawURL: String = "https://api.mangadex.org/manga/\(mangaID)/feed?limit=100&translatedLanguage%5B%5D=en&contentRating%5B%5D=safe&contentRating%5B%5D=suggestive&contentRating%5B%5D=erotica&contentRating%5B%5D=pornographic&includeFutureUpdates=1&order%5BcreatedAt%5D=asc&order%5BupdatedAt%5D=asc&order%5BpublishAt%5D=asc&order%5BreadableAt%5D=asc&order%5Bvolume%5D=asc&order%5Bchapter%5D=asc"
+        let rawURL: String = "https://api.mangadex.org/manga/\(mangaID)/feed?limit=500&translatedLanguage%5B%5D=en&contentRating%5B%5D=safe&contentRating%5B%5D=suggestive&contentRating%5B%5D=erotica&contentRating%5B%5D=pornographic&includeFutureUpdates=1&order%5BcreatedAt%5D=asc&order%5BupdatedAt%5D=asc&order%5BpublishAt%5D=asc&order%5BreadableAt%5D=asc&order%5Bvolume%5D=asc&order%5Bchapter%5D=asc"
         
         guard let apiurl = URL(string: rawURL) else {
             print("Failure and Emotional Damage")
