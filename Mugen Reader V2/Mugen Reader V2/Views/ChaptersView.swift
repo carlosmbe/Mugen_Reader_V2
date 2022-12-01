@@ -57,7 +57,7 @@ struct ChaptersView: View {
     }//body ends here
     
     func getLastReadID() -> String?{
-        var lastReadChapters = GetLastRead()
+        let lastReadChapters = GetLastRead()
         if let sameManga = lastReadChapters.firstIndex(where: {$0.id == chosenManga.id}){
             guard let finalIndex = chapterResults.firstIndex(where: {$0.id == lastReadChapters[sameManga].Chapter.id}) else { return nil }
             return chapterResults[finalIndex].id

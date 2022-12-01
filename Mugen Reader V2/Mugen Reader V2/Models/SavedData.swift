@@ -1,5 +1,5 @@
 //
-//  Saved Data.swift
+//  SavedData.swift
 //  Mugen Reader V2
 //
 //  Created by Carlos Mbendera on 27/11/2022.
@@ -52,7 +52,7 @@ func updateLastReadChapter(with newLastRead : [LastReadChapter]){
         
         var jsonData = try Data(contentsOf: fileURL)
         var finalData = try JSONDecoder().decode([LastReadChapter].self, from: jsonData)
-        print("Fianl Data is \(finalData)")
+      //  print("Fianl Data is \(finalData)")
     }catch{
         print(error)
     }

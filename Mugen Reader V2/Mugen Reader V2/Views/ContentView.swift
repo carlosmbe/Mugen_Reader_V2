@@ -8,15 +8,6 @@
 import SwiftUI
 
 struct ContentView: View {
-
-    var body: some View {
-            HomeView()
-        }
-}
-
-
-
-struct HomeView: View {
     
   //  @StateObject private var chosenMangaAlt = MangaClass()
   
@@ -38,6 +29,19 @@ struct HomeView: View {
     @State private var homeMangaResults = [Manga]()//This is more of a cache cause I put search results manga in MangaResults sometimes
     let seasonId = "4be9338a-3402-4f98-b467-43fb56663927"
     
+    var MangaListView : some View{
+        List(mangaResults){ manga in
+            NavigationLink(destination: MangaDescription(selectedManga: manga)){
+                HStack{
+                    MangaView(item: manga)
+                    Spacer()
+                }
+                .contentShape(Rectangle())
+            }
+            //HStack, Spacer and .contentShape make on tap gesture apply on entire list row area
+        }
+    }
+    
     var body: some View {
         
         if mangaResults.isEmpty{
@@ -46,16 +50,7 @@ struct HomeView: View {
         
         NavigationView{
             
-            List(mangaResults){ manga in
-                NavigationLink(destination: MangaDescription(selectedManga: manga)){
-                    HStack{
-                        MangaView(item: manga)
-                        Spacer()
-                    }
-                    .contentShape(Rectangle())
-                }
-                //HStack, Spacer and .contentShape make on tap gesture apply on entire list row area
-            }
+            MangaListView
             
             .searchable(text: $searchText)
             
@@ -68,6 +63,12 @@ struct HomeView: View {
             
             .onSubmit(of: .search) {
                 Task{   await tryAPICallAgain()    }
+            }
+            
+            .toolbar{
+                NavigationLink(destination: ReadingList()){
+                    Image(systemName: "bookmark")
+                }
             }
             
             .navigationTitle(title)
@@ -165,44 +166,6 @@ struct MangaView: View{
     }
 }//MangaView Ends Here
 
-struct MangaDescription: View{
-    
-    let selectedManga : Manga
-        
-    var body: some View{
-        let selectedManga = selectedManga
-        ZStack{
-            GeometryReader { geometry in
-                Manga.getCover(item: selectedManga)
-                    .opacity(0.1)
-                    .scaledToFill()
-                    .frame(width: geometry.size.width, height: geometry.size.height)
-                    .clipped()
-                    
-            }.ignoresSafeArea()
-            
-            VStack {
-            
-                    if let title = selectedManga.attributes.title.en{
-                        Text(title).font(.title).padding()
-                    }
-        
-                
-                if let desc = selectedManga.attributes.description?.en{
-                    Text(desc).font(.body).padding()
-                }
-                
-                NavigationLink(destination: ChaptersView(chosenManga: selectedManga)){
-                    Text("Read")
-                }
-                .buttonStyle(.borderedProminent)
-                .padding()
-                
-            }//V Stack ends here
-        }//ZStack Ends Here
-    }
-    
-}
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
