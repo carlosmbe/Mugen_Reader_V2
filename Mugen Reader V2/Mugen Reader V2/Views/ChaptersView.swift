@@ -19,18 +19,29 @@ struct ChaptersView: View {
     
     var ChaptersList : some View{
         List(chapterResults) { item in
-            NavigationLink(
-                destination: ReadingView(viewChapterID: item.id)
-                    .onAppear{
-                        let currentLastRead = LastReadChapter(id: chosenManga.id, MangaDetail: chosenManga, Chapter: item)
-                        appendToLastReadChapters(currentLastRead)
-                    },
-                label: {
-                    FeedChapter.buildChapterNameView(item)
-                }) .id(item.id) //.id for allowing jump scrolling
-            //Nav Link Ends Here
+            HStack{
+                NavigationLink(
+                    destination: ReadingView(viewChapterID: item.id)
+                        .onAppear{
+                            let currentLastRead = LastReadChapter(id: chosenManga.id, MangaDetail: chosenManga, Chapter: item)
+                            appendToLastReadChapters(currentLastRead)
+                        },
+                    label: {
+                        FeedChapter.buildChapterNameView(item)
+                    }) .id(item.id) //.id for allowing jump scrolling
+                //Nav Link Ends Here
+                    .contextMenu {
+                          Button("Download"){
+                              Task{
+                                  await DownloadedManga.downloadChapter(manga:chosenManga, chapterID: item.id, chapterName: item.attributes.title!)
+                              }
+                          }
+                    }
+            
+            }//HStack Ends Here
+            
         }
-        .navigationTitle(chosenManga.attributes.title.en!)
+        .navigationTitle(chosenManga.attributes.title.en ?? "No English Title")
         .navigationBarTitleDisplayMode(.inline)
         .task {
                 await getChapterResults()
@@ -88,8 +99,6 @@ struct ReadingView : View{
     @State private var messageAlertError = ""
     @State private var showingChapterAlert = false
     
-    @State private var baseUrl = ""
-    @State private var chapterHash = ""
     @State private var chapterPages = [String]()
     
     var body: some View{
@@ -97,9 +106,8 @@ struct ReadingView : View{
         ScrollView {
             VStack{
                 ForEach(chapterPages, id:\.self){ pageLink in
-                    let finalLink = ("\(baseUrl)/data-saver/\(chapterHash)/\(pageLink)")
                     
-                    AsyncImage(url: URL(string: finalLink)){ image in
+                    AsyncImage(url: URL(string: pageLink)){ image in
                         image
                             .resizable()
                             .scaledToFill()
@@ -113,19 +121,18 @@ struct ReadingView : View{
         
         .alert("There was an error", isPresented: $showingChapterAlert){}
         message:{ Text(messageAlertError)}
+        /* I have forgotten the need of this onChange hence I commented it out while I was shortening my code
             .onChange(of: baseUrl, perform: { newValue in
                     Task{  await getChapterPages()   }
             })//On Change ends here
+        */
             .task { await getChapterPages() }//Task ends here
            
     }//Body ends here
     
     func getChapterPages() async{
-        if let decodedResponse = try? await FeedChapter.getReadingChapterURLS(chapterID: viewChapterID){
-            baseUrl = decodedResponse.baseUrl
-            chapterPages = decodedResponse.chapter.dataSaver
-            chapterHash = decodedResponse.chapter.hash
-            print(baseUrl)
+        if let decodedResponse = try? await FeedChapter.getChapterPageImageURLs(chapterID: viewChapterID){
+          chapterPages = decodedResponse
         }else{
             showingChapterAlert = true
             messageAlertError = "If let failed when getting page links. Most likely chapter id fault"

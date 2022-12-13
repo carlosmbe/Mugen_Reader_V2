@@ -82,6 +82,24 @@ extension FeedChapter{
         throw FeedChapterErrors.unknownError
     }// Func Ends Here
     
+    
+    static func getChapterPageImageURLs(chapterID : String) async throws -> [String]{
+        if let decodedResponse = try? await FeedChapter.getReadingChapterURLS(chapterID: chapterID){
+            var baseUrl = decodedResponse.baseUrl
+            var pages = decodedResponse.chapter.dataSaver
+            var chapterHash = decodedResponse.chapter.hash
+    
+            var chapterPages = [String]()
+            
+            for page in pages{
+                let finalLink = ("\(baseUrl)/data-saver/\(chapterHash)/\(page)")
+                chapterPages.append(finalLink)
+            }
+            return chapterPages
+        }
+        throw FeedChapterErrors.unknownError
+    }
+    
     static func getReadingChapterURLS(chapterID : String) async throws -> ReadChapterResponse{
         
         print("Started getting pages")

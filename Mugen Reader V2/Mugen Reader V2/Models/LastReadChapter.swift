@@ -1,5 +1,5 @@
 //
-//  SavedData.swift
+//  LastReadChapter.swift
 //  Mugen Reader V2
 //
 //  Created by Carlos Mbendera on 27/11/2022.
@@ -10,12 +10,8 @@ import Foundation
 struct LastReadChapter : Codable, Identifiable{
     let id : String
     let MangaDetail : Manga
-  //  let MangaName: MangaLang?
- //   let MangaDesc : MangaLang?
     var Chapter : FeedChapter
-    
 }
-
 
 func GetLastRead() -> [LastReadChapter]{
     do{

@@ -29,6 +29,18 @@ struct ContentView: View {
     @State private var homeMangaResults = [Manga]()//This is more of a cache cause I put search results manga in MangaResults sometimes
     let seasonId = "4be9338a-3402-4f98-b467-43fb56663927"
     
+    
+    var ToolBarItems : some View{
+        Group{
+            NavigationLink(destination: Downloads()){
+                Image(systemName: "arrow.down.circle")
+            }
+            NavigationLink(destination: ReadingList()){
+                Image(systemName: "bookmark")
+            }
+        }
+    }
+    
     var MangaListView : some View{
         List(mangaResults){ manga in
             NavigationLink(destination: MangaDescription(selectedManga: manga)){
@@ -66,9 +78,7 @@ struct ContentView: View {
             }
             
             .toolbar{
-                NavigationLink(destination: ReadingList()){
-                    Image(systemName: "bookmark")
-                }
+                ToolBarItems
             }
             
             .navigationTitle(title)
