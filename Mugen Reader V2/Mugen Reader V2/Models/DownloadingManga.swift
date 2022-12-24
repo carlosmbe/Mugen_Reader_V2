@@ -5,6 +5,7 @@
 //  Created by Carlos Mbendera on 13/12/2022.
 //
 
+import AVFoundation
 import Foundation
 
 struct DownloadedManga : Codable{
@@ -34,6 +35,18 @@ func downloadAndStoreImage(url: String) {
     try! imageData.write(to: fileURL)
 }
 
+func deleteDownChapters(_ chapter : [String]){
+    let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+   
+    for page in chapter{
+        let fileName = URL(string: page)!.lastPathComponent
+        let fileURL = documents.appendingPathComponent(fileName)
+        try! FileManager.default.removeItem(at: fileURL)
+        print("Removed \(fileURL)")
+    }
+    
+}
+
 extension DownloadedManga{
     
     static func downloadChapter(manga: Manga, chapterID: String, chapterName: String) async{
@@ -49,6 +62,7 @@ extension DownloadedManga{
                  let fileURL = documents.appendingPathComponent(fileName)
                  finalUrlArr.append("\(fileURL)")
              }//For Ends Here
+             
              
              var downs = [downloadedChapter]()
              let downloadedChapter = downloadedChapter(chapterName: chapterName, chapterID: chapterID, chapterPages: finalPageLinks)
@@ -79,6 +93,10 @@ extension DownloadedManga{
     }
     
     static func appendDownloadedChapters(_ downMan : DownloadedManga){
+       //MARK: Play this sound to know a download is complete. Otherwise make Alert or Progress Bar later
+        //Not always consistant
+        AudioServicesPlayAlertSound(SystemSoundID(1351))
+        
         var downloadedManga = GetDownloads()
         
         if let sameManga = downloadedManga.firstIndex(where: {$0.MangaDetail.id == downMan.MangaDetail.id}){
