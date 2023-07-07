@@ -47,18 +47,15 @@ enum FeedChapterErrors: Error{
 
 extension FeedChapter{
     
-    static func buildChapterNameView(_ chapter: FeedChapter) -> some View{
-        @ViewBuilder var chapterView : some View {
-            if let chapterOptional = chapter.attributes.chapter{
-                Text("Chapter \(chapterOptional)")
-                if let titleoptional = chapter.attributes.title{
-                    Text( titleoptional.isEmpty ? "" : titleoptional)
-                        .padding(.leading, 10)
-                }
-            }
+    static func buildChapterNameView(_ chapter: FeedChapter) -> some View {
+        
+        VStack(alignment: .leading) {
+            Text(chapter.attributes.chapter.map { "Chapter \($0)" } ?? "")
+            Text(chapter.attributes.title?.isEmpty == false ? chapter.attributes.title! : "")
+                .padding(.leading, chapter.attributes.title?.isEmpty == true ? 0 : 10)
         }
-        return chapterView
     }
+
     
     static func getMangaChapterFeed(for mangaID : String) async throws -> [FeedChapter] {
         let rawURL: String = "https://api.mangadex.org/manga/\(mangaID)/feed?limit=500&translatedLanguage%5B%5D=en&contentRating%5B%5D=safe&contentRating%5B%5D=suggestive&contentRating%5B%5D=erotica&contentRating%5B%5D=pornographic&includeFutureUpdates=1&order%5BcreatedAt%5D=asc&order%5BupdatedAt%5D=asc&order%5BpublishAt%5D=asc&order%5BreadableAt%5D=asc&order%5Bvolume%5D=asc&order%5Bchapter%5D=asc"

@@ -5,6 +5,7 @@
 //  Created by Carlos Mbendera on 13/12/2022.
 //
 
+
 import AVFoundation
 import Foundation
 
@@ -47,9 +48,21 @@ func deleteDownChapters(_ chapter : [String]){
     
 }
 
+
+
 extension DownloadedManga{
     
-    static func downloadChapter(manga: Manga, chapterID: String, chapterName: String) async{
+    static func downloadChapter(manga: Manga, chapterID: String, chapterName: String) async {
+        
+        
+        let existingDownloads = GetDownloads()
+        let exists = existingDownloads.contains { $0.MangaDetail.id == manga.id && $0.chapters.contains { $0.chapterID == chapterID } }
+        if exists {
+            print("Chapter already downloaded. Skipping download.")
+            return
+        }
+        
+        
          if let decodedResponse = try? await FeedChapter.getChapterPageImageURLs(chapterID: chapterID){
              var finalPageLinks = decodedResponse
              
@@ -76,21 +89,23 @@ extension DownloadedManga{
          }
      }
     
-    static func GetDownloads() -> [DownloadedManga]{
-        do{
+    static func GetDownloads() -> [DownloadedManga] {
+        do {
             let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
             let fileURL = paths[0].appendingPathComponent("DownloadedChapters.json")
-  
+            if FileManager.default.fileExists(atPath: fileURL.path) {
                 let dataInitLastRead = try Data(contentsOf: fileURL)
                 let dataArray = try JSONDecoder().decode([DownloadedManga].self, from: dataInitLastRead)
                 return dataArray
-            
-           
-        }catch{
+            } else {
+                return []
+            }
+        } catch {
             print("Computed Var Failed Init \nError is \(error.localizedDescription)")
             return []
         }
     }
+
     
     static func appendDownloadedChapters(_ downMan : DownloadedManga){
        //MARK: Play this sound to know a download is complete. Otherwise make Alert or Progress Bar later

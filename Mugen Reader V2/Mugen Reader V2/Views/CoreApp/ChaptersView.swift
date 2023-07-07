@@ -9,6 +9,9 @@ import SwiftUI
 
 struct ChaptersView: View {
     
+    @State private var selectedChapters = Set<String>()
+    @State private var downloadingChapters = [String: Bool]()
+    
     let chosenManga: Manga
     
     @State private var chapterResults = [FeedChapter]()
@@ -18,8 +21,16 @@ struct ChaptersView: View {
     }
     
     var ChaptersList : some View{
-        List(chapterResults) { item in
+        List(chapterResults, selection: $selectedChapters) { item in
             HStack{
+                
+                if downloadingChapters[item.id] == true {
+                                 ProgressView()
+                             } else if let downloaded = downloadingChapters[item.id], downloaded == false {
+                                 Text("Downloaded")
+                             }
+                
+                
                 NavigationLink(
                     destination: ReadingView(viewChapterID: item.id)
                         .onAppear{
@@ -33,7 +44,9 @@ struct ChaptersView: View {
                     .contextMenu {
                           Button("Download"){
                               Task{
-                                  await DownloadedManga.downloadChapter(manga:chosenManga, chapterID: item.id, chapterName: item.attributes.title!)
+                                  let chapterName = "\(item.attributes.chapter ?? ""): \(item.attributes.title ?? "")"
+                                
+                                  await DownloadedManga.downloadChapter(manga:chosenManga, chapterID: item.id, chapterName: chapterName)
                               }
                           }
                     }
@@ -54,18 +67,45 @@ struct ChaptersView: View {
             ScrollViewReader { proxy in
                 ChaptersList
                     .toolbar{
+                
                         Button("Continue") {
                             withAnimation{
                                 proxy.scrollTo(index, anchor: .top)
                             }
                         }
+                        
+                        EditButton()
+                        
+                        Button("Download Selected", action: downloadMultiChapter)
+                        
                     }
             }
         }else{
             ChaptersList
+                .toolbar{
+                    EditButton()
+                    
+                    Button("Download Selected", action: downloadMultiChapter)
+                    
+                }
         }
   
     }//body ends here
+    
+    func downloadMultiChapter(){
+        for chapterID in selectedChapters {
+            if let chapter = chapterResults.first(where: { $0.id == chapterID }) {
+                
+                let chapterName = "\(chapter.attributes.chapter ?? ""): \(chapter.attributes.title ?? "")"
+                downloadingChapters[chapterID] = true
+                
+                Task {
+                    await DownloadedManga.downloadChapter(manga: chosenManga, chapterID: chapter.id, chapterName: chapterName)
+                    downloadingChapters[chapterID] = false
+                }
+            }
+        }
+    }
     
     func getLastReadID() -> String?{
         let lastReadChapters = GetLastRead()

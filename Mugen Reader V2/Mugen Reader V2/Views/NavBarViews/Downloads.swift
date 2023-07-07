@@ -11,15 +11,24 @@ import SwiftUI
 struct Downloads: View {
     
     @State private var downloadsJSON = DownloadedManga.GetDownloads()
+    
     var body: some View {
-        Text("\(downloadsJSON.count)")
+        if downloadsJSON.isEmpty{
+            Text("Downloads = \(downloadsJSON.count)")
+            Text("If you've downloaded something and it's not showing up please pull down")
+        }
+        
+        /*
         Button("Refresh"){
             downloadsJSON = DownloadedManga.GetDownloads()
         }
+         */
         
         List(downloadsJSON.indices, id: \.self) { manga in
             let title = downloadsJSON[manga].MangaDetail.attributes.title.en!
             NavigationLink(title, destination: chooseChapter(DownManga: downloadsJSON[manga] )   )
+        }.refreshable {
+            downloadsJSON = DownloadedManga.GetDownloads()
         }
     }
 }
@@ -60,9 +69,9 @@ struct chooseChapter : View{
         
         List{
             ForEach(DownManga.chapters.indices, id: \.self){ i in
-                let Chap = DownManga.chapters[i]
-                let title = Chap.chapterName
-                NavigationLink(title, destination: readDownload(chapterPages: Chap.chapterPages))
+                let chap = DownManga.chapters[i]
+                let title = chap.chapterName
+                NavigationLink(title, destination: ReadDownload(chapterPages: chap.chapterPages))
             }
             .onDelete(perform: deleteDownloadedChapter)
         }
@@ -73,33 +82,47 @@ struct chooseChapter : View{
     
 }
 
-
-struct readDownload : View{
+struct ReadDownload: View {
     
     var chapterPages: [String]
     
-    var body: some View{
+    @State private var uiImages = [String: UIImage]()
+    
+    var body: some View {
         ScrollView {
             VStack{
-                let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-                ForEach(chapterPages, id:\.self){ pageLink in
-                    
-                    let fileName = URL(string: pageLink)!.lastPathComponent
-                    let fileURL = documents.appendingPathComponent(fileName)
-                    
-                    let imageData = try!  Data(contentsOf: fileURL)
-                    
-                    Image(uiImage: UIImage(data: imageData)!)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                }
+                ForEach(chapterPages, id: \.self) { pageLink in
+                    if let uiImage = uiImages[pageLink] {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } else {
+                        ProgressView() // Shows loading indicator until image is loaded
+                            .onAppear {
+                                loadImage(from: pageLink)
+                            }
+                    }
                 }
             }
-            
-            
         }
     }
     
+    func loadImage(from pageLink: String) {
+        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let fileName = URL(string: pageLink)!.lastPathComponent
+        let fileURL = documents.appendingPathComponent(fileName)
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            if let imageData = try? Data(contentsOf: fileURL),
+               let uiImage = UIImage(data: imageData) {
+                DispatchQueue.main.async {
+                    self.uiImages[pageLink] = uiImage
+                }
+            }
+        }
+    }
+}
+
     struct Downloads_Previews: PreviewProvider {
         static var previews: some View {
             Downloads()
