@@ -16,7 +16,7 @@ Note: I'm still working on this Read Me. Otherwise, the app has all the essentia
 
 ## Things To Add
 
-- [x] Ability to toggle between HD/SD Manga Images
+- [ ] Ability to toggle between HD/SD Manga Images
 - [ ] A Next Chapter Button
 - [ ] Quality of life features and UI overhaul
 - [ ] Mac OSx Version
