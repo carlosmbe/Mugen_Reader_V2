@@ -49,9 +49,9 @@ struct ReadingList: View {
                 //HStack, Spacer and .contentShape make on tap gesture apply on entire list row area
             }
             .onDelete(perform: deleteItemFromLastRead)
-            .toolbar{
+          /*  .toolbar{
                 EditButton()
-            }
+            }*/
         }
     }
     

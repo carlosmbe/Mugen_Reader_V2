@@ -16,33 +16,26 @@ struct MangaView: View{
         HStack {
             
             Manga.getCover(item: item)
+                .scaledToFit()
                 .frame(width: 75, height: 112.5)
                 .cornerRadius(10)
-                .shadow(radius: 10)
+                .shadow(color: .gray, radius: 5, x: 0, y: 2) // Subtle shadow
             
             VStack(alignment: .leading){
                 
                 Text(item.attributes.title.en ?? "No Title UwU")
-                    .font(.title3)
+                    .font(.headline) 
                     .fontWeight(.semibold)
                     .lineLimit(2)
-                    .padding(.bottom, 5)
-                
                 
                 Text("Status: \(item.attributes.status.capitalized)")
-                    .padding(.leading, 5)
-                    .shadow(radius: 2)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
                 
-                //TODO: Figure out how to elegently turn 0000 into N/A
-                HStack {
-                    Image(systemName: "calendar")
-                    
-                    Text("Year: \(item.attributes.year ?? 0000)")
-                        
-                }
-                
-           
-                
+                Text("Year: \(item.attributes.year.map { $0 != 0 ? String($0) : "N/A" } ?? "N/A")")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            
             }//VStack Ends Here
             
             

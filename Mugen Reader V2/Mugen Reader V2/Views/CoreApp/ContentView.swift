@@ -176,6 +176,9 @@ struct ContentViewGridViewOnly: View {
     
 }//Home View Ends here
 
+
+
+
 struct ContentViewListViewOnly: View {
     
     let seasonId = "77430796-6625-4684-b673-ffae5140f337"
@@ -191,6 +194,7 @@ struct ContentViewListViewOnly: View {
     @State private var searchText = ""
     
     @State private var title = "Seasonal"
+    @State private var activeTab: Int = 0 // Using this to track the active tab
     
     @State private var mangaResults = [Manga]()
     
@@ -201,7 +205,8 @@ struct ContentViewListViewOnly: View {
     
     @State private var homeMangaResults = [Manga]()//This is more of a cache cause I put search results manga in MangaResults sometimes
 
-    
+    /*
+     //MARK: Moved Tool Bar Items to Tab View
     var ToolBarItems: some View {
             Group {
                 NavigationLink(destination: Downloads() ){
@@ -215,7 +220,7 @@ struct ContentViewListViewOnly: View {
                 
             }
         }
-    
+    */
     
     var MangaListView : some View{
         List(mangaResults){ manga in
@@ -233,7 +238,8 @@ struct ContentViewListViewOnly: View {
     
     
     var body: some View {
-        
+        TabView{
+            
         Group{
             
             if mangaResults.isEmpty{
@@ -246,41 +252,66 @@ struct ContentViewListViewOnly: View {
                     Text("UwU")
                         .padding()
                 }
+            }else{
+                
+                MangaListView
+                    .searchable(text: $searchText)
+                    .onChange(of: searchText) { _ in
+                        if searchText.isEmpty{
+                            mangaResults = homeMangaResults
+                            title = "Seasonal"
+                        }
+                    }
+                    .onSubmit(of: .search) {
+                        Task{   await tryAPICallAgain()    }
+                    }
+                //MARK: Moved Tool Bar Items to Tab View
+                /*
+                    .toolbar{
+                        ToolBarItems
+                    }
+                 */
+                    .navigationTitle(title)
+                    .alert(isPresented: $showingErrorAlert){
+                        Alert(
+                            title: Text("There was an error :<")
+                            ,primaryButton: Alert.Button.default(Text("Try Again")){
+                                Task{   await tryAPICallAgain() }
+                            }
+                            ,secondaryButton: .cancel()
+                        )}//Alert Closure Ends Here
+                
             }
             
-            MangaListView
-                .searchable(text: $searchText)
-                .onChange(of: searchText) { _ in
-                    if searchText.isEmpty{
-                        mangaResults = homeMangaResults
-                        title = "Seasonal"
+        }//Group Ends Here
+        .tabItem {  Label("Seasonal", systemImage: "leaf") }
+        .tag(0)
+        .task{  await getHomePageManga()    }
+            //MARK: I moved the Navigation View to App and need somewhere to put to this task. Hence I used a Group
+            
+            // Downloads Tab
+            Downloads()
+                .onAppear { title = "Downloads" }
+                .tabItem {   Label("Downloads", systemImage: "arrow.down.circle")   }
+                .tag(1)
+            
+            // Reading List Tab
+            ReadingList()
+                .onAppear { title = "Reading List" }
+                .tabItem {  Label("Reading List", systemImage: "bookmark")    }
+                .tag(2)
+                .toolbar {
+                    
+                    //TODO: Conditional Toolbar items, PS Will have to do similar when downloads are present
+                    if activeTab == 2 { // Assuming Reading List might need an Edit button
+                        EditButton()
                     }
                 }
-                .onSubmit(of: .search) {
-                    Task{   await tryAPICallAgain()    }
-                }
-                .toolbar{
-                    ToolBarItems
-                }
-                .navigationTitle(title)
-                .alert(isPresented: $showingErrorAlert){
-                    Alert(
-                        title: Text("There was an error :<")
-                        ,primaryButton: Alert.Button.default(Text("Try Again")){
-                            Task{   await tryAPICallAgain() }
-                        }
-                        ,secondaryButton: .cancel()
-                    )}//Alert Closure Ends Here
             
-            
-        }
-        .task{  await getHomePageManga()    }
-        //MARK: I moved the Navigation View to App and need somewhere to put to this task. Hence I used a Group
+        }//Tab View End
+        
         
     }
-    
-    
-    
     
     
     //This function checks if we're trying to a search again or a inital homepage load

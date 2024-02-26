@@ -13,15 +13,17 @@ struct Downloads: View {
     @State private var downloadsJSON = DownloadedManga.GetDownloads()
     
     var body: some View {
+        VStack{
+            
         if downloadsJSON.isEmpty{
             Text("Downloads = \(downloadsJSON.count)")
             Text("If you've downloaded something and it's not showing up please pull down")
         }
         
         /*
-        Button("Refresh"){
-            downloadsJSON = DownloadedManga.GetDownloads()
-        }
+         Button("Refresh"){
+         downloadsJSON = DownloadedManga.GetDownloads()
+         }
          */
         
         List(downloadsJSON.indices, id: \.self) { manga in
@@ -30,7 +32,10 @@ struct Downloads: View {
         }.refreshable {
             downloadsJSON = DownloadedManga.GetDownloads()
         }
+        
     }
+    }//End of View Body
+    
 }
 
 struct chooseChapter : View{
@@ -123,8 +128,8 @@ struct ReadDownload: View {
     }
 }
 
-    struct Downloads_Previews: PreviewProvider {
-        static var previews: some View {
-            Downloads()
-        }
+struct Downloads_Previews: PreviewProvider {
+    static var previews: some View {
+        Downloads()
     }
+}
