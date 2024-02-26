@@ -1,6 +1,9 @@
 # Mugen_Reader_V2
 
-Mugen_Reader_V2 is an iOS app built using SwiftUI that connects with the MangaDex API to fetch and read manga. The app provides a simple, user-friendly interface to browse and read a wide range of manga.
+Mugen_Reader_V2 is an iOS, iPad and Vision OS app built using SwiftUI that connects with the MangaDex API to fetch and read manga. The app provides a simple, user-friendly interface to browse and read a wide range of manga.
+
+Screenshots are at the bottom.
+
 
 ## Features
 
@@ -19,7 +22,7 @@ Note: I'm still working on this Read Me. Otherwise, the app has all the essentia
 - [ ] Ability to toggle between HD/SD Manga Images
 - [ ] A Next Chapter Button
 - [ ] Quality of life features and UI overhaul
-- [ ] Mac OSx Version
+- [ ] Unlimited Chapter/Manga Scroll and Translator Group Details
 
 ## License
 
@@ -29,7 +32,20 @@ This project uses the following license: MIT License.
 
 MangaDex, for their API. 
 
-## Beautiful Pictures (Screen Shots)
+
+## Beautiful Vision OS Beta (Screen Shots)
+![Simulator Screenshot - Apple Vision Pro - 2024-02-26 at 17 03 20](https://github.com/carlosmbe/Mugen_Reader_V2/assets/53784701/9f7e01f3-461a-4c24-80b9-4ffa541ed806)
+![Simulator Screenshot - Apple Vision Pro - 2024-02-26 at 17 03 52](https://github.com/carlosmbe/Mugen_Reader_V2/assets/53784701/17c13fd6-a9b5-406e-adf3-61407687b95a)
+![Simulator Screenshot - Apple Vision Pro - 2024-02-26 at 17 03 33](https://github.com/carlosmbe/Mugen_Reader_V2/assets/53784701/71d6b2a0-8fe9-4519-b3da-8a05f556ebe7)
+![Simulator Screenshot - Apple Vision Pro - 2024-02-26 at 17 04 07](https://github.com/carlosmbe/Mugen_Reader_V2/assets/53784701/80513b35-00a6-4c8f-b17e-99122eb4368d)
+
+### Super Compressed Video 
+
+https://github.com/carlosmbe/Mugen_Reader_V2/assets/53784701/93282584-6d7a-4319-9e77-23c6f925fc62
+
+
+ 
+## Beautiful Pictures iPad (Screen Shots)
 
 <img src="https://github.com/carlosmbe/Mugen_Reader_V2/assets/53784701/7843bbbf-cb4f-46fc-8cf8-c9fc028e047f" width="350">
 
