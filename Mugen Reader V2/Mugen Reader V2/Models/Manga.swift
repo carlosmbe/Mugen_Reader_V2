@@ -10,11 +10,18 @@ import SwiftUI
 
 //MARK: - Manga STRUCTS
 
+struct SeasonalMangaListAntsylich: Codable {
+    let id: String
+    let name: String
+    let manga_ids: [String]
+}
+
+
 
 struct MangaResponse: Codable{
-  var  result:    String
-  var  response:  String
-  var  data:      [Manga]
+    var  result:    String
+    var  response:  String
+    var  data:      [Manga]
 }
 
 struct Manga: Codable, Identifiable{
@@ -82,11 +89,42 @@ extension Manga{
         
         return apiString
         
-    
         
-        }//Build Search For Ends Here
+        
+    }//Build Search For Ends Here
     
-    static func buildSeasonalMangaCall (seasonListId: String) async throws -> String{
+    
+    
+    static func getCallSeasonalMangaFromAntsylich()async throws -> String?{
+        
+        let url = URL(string: "https://antsylich.github.io/mangadex-seasonal/seasonal-list.json" )
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url!)
+            
+            let response = try JSONDecoder().decode(SeasonalMangaListAntsylich.self, from: data)
+            
+            var idsListString = ""
+            
+            for item in response.manga_ids {
+                idsListString = "\(idsListString)&ids%5B%5D=\(item)"
+            }
+            
+            print("https://api.mangadex.org/manga?includedTagsMode=AND&excludedTagsMode=OR&availableTranslatedLanguage%5B%5D=en\(idsListString)&contentRating%5B%5D=safe&contentRating%5B%5D=suggestive&contentRating%5B%5D=erotica&order%5BlatestUploadedChapter%5D=desc&includes%5B%5D=manga&includes%5B%5D=cover_art")
+            
+            return "https://api.mangadex.org/manga?includedTagsMode=AND&excludedTagsMode=OR&availableTranslatedLanguage%5B%5D=en\(idsListString)&contentRating%5B%5D=safe&contentRating%5B%5D=suggestive&contentRating%5B%5D=erotica&order%5BlatestUploadedChapter%5D=desc&includes%5B%5D=manga&includes%5B%5D=cover_art"
+            
+            
+        } catch {
+            print("Failed to fetch season Manga IDs: \(error)")
+        }
+        
+        throw MangaCallError.network("You're Offline or your device has an issue") //If the function made it here then the API call failed thus why I'm throwing
+    }
+    
+    
+    static func buildSeasonalMangaCall (seasonListId: String) async throws -> String?{
+        
         
         let listURL: String = "https://api.mangadex.org/list/\(seasonListId)"
         
@@ -106,18 +144,26 @@ extension Manga{
                     idsListString = "\(idsListString)&ids%5B%5D=\(item.id)"
                 }
                 
-               return "https://api.mangadex.org/manga?includedTagsMode=AND&excludedTagsMode=OR&availableTranslatedLanguage%5B%5D=en\(idsListString)&contentRating%5B%5D=safe&contentRating%5B%5D=suggestive&contentRating%5B%5D=erotica&order%5BlatestUploadedChapter%5D=desc&includes%5B%5D=manga&includes%5B%5D=cover_art"
+                
+                return "https://api.mangadex.org/manga?includedTagsMode=AND&excludedTagsMode=OR&availableTranslatedLanguage%5B%5D=en\(idsListString)&contentRating%5B%5D=safe&contentRating%5B%5D=suggestive&contentRating%5B%5D=erotica&order%5BlatestUploadedChapter%5D=desc&includes%5B%5D=manga&includes%5B%5D=cover_art"
                 
                 
-            }   else{   throw MangaCallError.decodedResponse("There was an error decoding the JSON Values")    }
+            }   else{   throw MangaCallError.decodedResponse("SLID There was an error decoding the JSON Values")    }
             
             
         }//Do Ends Here
+        
         catch {      print("There was an error getting Seasonal IDs \n \(error)")     }
         
         throw MangaCallError.network("You're Offline") //If the function made it here then the API call failed thus why I'm throwing
         
     }// func buildSeasonalMangaCall ends here
+    
+    
+    
+    
+    
+    
     
     static func callMangaDexAPI(for callURL: String) async throws -> [Manga]{
         
@@ -126,9 +172,9 @@ extension Manga{
             do{
                 let (data, _) = try await URLSession.shared.data(from: apiurl)
                 if let decodedResponse = try? JSONDecoder().decode(MangaResponse.self, from: data){
-                      return decodedResponse.data
-                        // Done Getting Mangas
-                    }else{  throw MangaCallError.decodedResponse("There was an error decoding the JSON Values")    }
+                    return decodedResponse.data
+                    // Done Getting Mangas
+                }else{  throw MangaCallError.decodedResponse("There was an error decoding the JSON Values")    }
                 
             }// Do ends here
             catch {      print("There was an error getting Manga from the IDs \n \(error)")     }
@@ -142,18 +188,18 @@ extension Manga{
     static func getCover(item : Manga) -> some View{
         
         var finallink = ""
-       
+        
         for relation in item.relationships{
             if relation.type == "cover_art"{
                 if  let coverName = relation.attributes?.fileName{
-                       finallink = "https://uploads.mangadex.org/covers/\(item.id)/\(coverName).256.jpg"
-               //    let _ =  print("\(item.attributes.title) https://uploads.mangadex.org/covers/\(item.id)/\(coverName)")
+                    finallink = "https://uploads.mangadex.org/covers/\(item.id)/\(coverName).256.jpg"
+                    //    let _ =  print("\(item.attributes.title) https://uploads.mangadex.org/covers/\(item.id)/\(coverName)")
                 }
             }
         }
-         
+        
         //You don't really need CachedAsyncImage. Normal AsyncImage works. It just that cacheing improves the UX
-      return  CachedAsyncImage(url: URL(string: finallink) ) { phase in
+        return  CachedAsyncImage(url: URL(string: finallink) ) { phase in
             
             switch phase {
                 
@@ -170,7 +216,7 @@ extension Manga{
                 
             @unknown default:
                 Image(systemName: "exclamationmark.icloud")
-            
+                
             }//Switch ends here
             
         }//Closure ends here
@@ -184,19 +230,19 @@ extension Manga{
         let apiString = "https://api.mangadex.org/manga?title=\(newQueryText!)&includedTagsMode=AND&excludedTagsMode=OR&availableTranslatedLanguage%5B%5D=en&contentRating%5B%5D=safe&contentRating%5B%5D=suggestive&contentRating%5B%5D=erotica&order%5BlatestUploadedChapter%5D=desc&includes%5B%5D=manga&includes%5B%5D=cover_art"
         
         return apiString
-        } //Seatch Ends Here
+    } //Seatch Ends Here
     
     static func produceExampleManga() -> Manga{
-         let dummyLang: MangaLang = MangaLang(en: "Please Try Again")
+        let dummyLang: MangaLang = MangaLang(en: "Please Try Again")
         
-         let dummyDesc = MangaLang(en: "Either an error happened or we're still loading data")
+        let dummyDesc = MangaLang(en: "Either an error happened or we're still loading data")
         
-         let dummyAttrubuts: MangaAttributes = MangaAttributes(title: dummyLang, description: dummyDesc,
+        let dummyAttrubuts: MangaAttributes = MangaAttributes(title: dummyLang, description: dummyDesc,
                                                               year: 3000, status: "Very Sad")
         
-         let dummyRelation = [MangaRelations]()
-
-         return Manga(id: "Blah", type: "manga", attributes: dummyAttrubuts, relationships: dummyRelation)
+        let dummyRelation = [MangaRelations]()
+        
+        return Manga(id: "Blah", type: "manga", attributes: dummyAttrubuts, relationships: dummyRelation)
     } //produce Example Manga Item Ends Here
     
 }//Extension Ends Here

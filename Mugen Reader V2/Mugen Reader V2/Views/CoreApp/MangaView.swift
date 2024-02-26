@@ -47,7 +47,7 @@ struct MangaView: View{
             
             
         }//HStack Ends Here
-        .padding()
+        .padding([.top, .bottom])
         
     }
 }//MangaView Ends Here
